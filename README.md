@@ -1,4 +1,4 @@
-# bytebank
+# Bytebank
 
 A new Flutter project.
 
