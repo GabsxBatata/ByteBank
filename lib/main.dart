@@ -9,7 +9,7 @@ class ByteBankApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       home: Scaffold(
         body: ListaTransferencia(),
       ),
@@ -28,11 +28,22 @@ class FormularioTransferencia extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ComponentAppBar(AppBarName('Criar transferência')),
+      appBar: AppBar(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadiusDirectional.only(
+            bottomStart: Radius.circular(8),
+            bottomEnd: Radius.circular(8),
+          ),
+        ),
+        title: const Text('Criar transferência'),
+        titleTextStyle: const TextStyle(
+            color: Colors.black54, fontSize: 20, fontWeight: FontWeight.bold),
+        backgroundColor: Colors.green,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
-          children: <Widget>[
+          children: [
             Editor(
               controller: _controladorCampoNumeroConta,
               label: 'Número da contra',
@@ -81,7 +92,7 @@ class Editor extends StatelessWidget {
   final String _placeholder;
   final IconData? _icon;
 
-  const Editor(
+  Editor(
       {super.key,
       required TextEditingController controller,
       required String label,
@@ -109,70 +120,58 @@ class Editor extends StatelessWidget {
 }
 
 // Lista de transferências
-class ListaTransferencia extends StatelessWidget {
-  const ListaTransferencia({super.key});
+class ListaTransferencia extends StatefulWidget {
+  ListaTransferencia({super.key});
+  final List<Transferencia> _transferencias = List.empty(growable: true);
 
+  @override
+  State<StatefulWidget> createState() {
+    return ListaTransferenciaState();
+  }
+}
+
+class ListaTransferenciaState extends State<ListaTransferencia> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ComponentAppBar(AppBarName('Transferências')),
-      body: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            ItemTransferencia(Transferencia(100, 200)),
-          ],
+      appBar: AppBar(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadiusDirectional.only(
+            bottomStart: Radius.circular(8),
+            bottomEnd: Radius.circular(8),
+          ),
         ),
+        title: const Text('Transferências'),
+        titleTextStyle: const TextStyle(
+            color: Colors.black54, fontSize: 20, fontWeight: FontWeight.bold),
+        backgroundColor: Colors.green,
+      ),
+      body: ListView.builder(
+        itemCount: widget._transferencias.length,
+        itemBuilder: (context, index) {
+          final transferencia = widget._transferencias[index];
+          return ItemTransferencia(transferencia);
+        },
+        padding: const EdgeInsets.all(10),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          final Future<Transferencia?> future = Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FormularioTransferencia(),
-            ),
-          );
+          final Future future =
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return FormularioTransferencia();
+          }));
           future.then((transferenciaRecebida) {
-            debugPrint('chegou no then do print');
-            debugPrint('transferenciaRecebida');
+            if (transferenciaRecebida != null) {
+              setState(() {
+                widget._transferencias.add(transferenciaRecebida);
+              });
+            }
           });
         },
         child: const Icon(Icons.add),
       ),
     );
   }
-}
-
-// Componente para app bar
-class AppBarName {
-  final String name;
-
-  AppBarName(this.name);
-}
-
-class ComponentAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final AppBarName _name;
-
-  const ComponentAppBar(this._name, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadiusDirectional.only(
-          bottomStart: Radius.circular(8),
-          bottomEnd: Radius.circular(8),
-        ),
-      ),
-      title: Text(_name.name),
-      titleTextStyle: const TextStyle(
-          color: Colors.black54, fontSize: 20, fontWeight: FontWeight.bold),
-      backgroundColor: Colors.green,
-    );
-  }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
 // Card de transferência
