@@ -10,64 +10,41 @@ class ByteBankApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        body: ListaTransferencia(),
+      theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          color: Colors.green,
+          titleTextStyle: TextStyle(
+              color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        colorScheme:
+            ColorScheme.fromSwatch(primarySwatch: Colors.green).copyWith(
+          secondary: Colors.blueAccent[700],
+        ),
+        elevatedButtonTheme:
+            ElevatedButtonThemeData(style: ElevatedButton.styleFrom()),
+        buttonTheme: ButtonThemeData(
+            buttonColor: Colors.greenAccent[700],
+            textTheme: ButtonTextTheme.primary),
       ),
+      home: ListaTransferencia(),
     );
   }
 }
 
 // Formulário para criar uma transferência
-class FormularioTransferencia extends StatelessWidget {
-  final TextEditingController _controladorCampoNumeroConta =
-      TextEditingController();
-  final TextEditingController _controladorCampoValor = TextEditingController();
-
+class FormularioTransferencia extends StatefulWidget {
   FormularioTransferencia({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadiusDirectional.only(
-            bottomStart: Radius.circular(8),
-            bottomEnd: Radius.circular(8),
-          ),
-        ),
-        title: const Text('Criar transferência'),
-        titleTextStyle: const TextStyle(
-            color: Colors.black54, fontSize: 20, fontWeight: FontWeight.bold),
-        backgroundColor: Colors.green,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            Editor(
-              controller: _controladorCampoNumeroConta,
-              label: 'Número da contra',
-              placeholder: '0000',
-            ),
-            Editor(
-              controller: _controladorCampoValor,
-              label: 'Valor',
-              placeholder: '0000',
-              icon: Icons.monetization_on,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: ElevatedButton(
-                  onPressed: () {
-                    criarTransferencia(context);
-                  },
-                  child: const Text('Confirmar')),
-            ),
-          ],
-        ),
-      ),
-    );
+  State<StatefulWidget> createState() {
+    return FormularioTransferenciaState();
   }
+}
+
+class FormularioTransferenciaState extends State<FormularioTransferencia> {
+  final TextEditingController _controladorCampoNumeroConta =
+      TextEditingController();
+  final TextEditingController _controladorCampoValor = TextEditingController();
 
   void criarTransferencia(BuildContext context) {
     final int? accountNumber = int.tryParse(_controladorCampoNumeroConta.text);
@@ -83,6 +60,50 @@ class FormularioTransferencia extends StatelessWidget {
       );
       Navigator.pop(context, transferenciaCriada);
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadiusDirectional.only(
+            bottomStart: Radius.circular(8),
+            bottomEnd: Radius.circular(8),
+          ),
+        ),
+        title: const Text('Criar transferência'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(10),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Editor(
+                controller: _controladorCampoNumeroConta,
+                label: 'Número da contra',
+                placeholder: '0000',
+              ),
+              Editor(
+                controller: _controladorCampoValor,
+                label: 'Valor',
+                placeholder: '0000',
+                icon: Icons.monetization_on,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: ElevatedButton(
+                  onPressed: () {
+                    criarTransferencia(context);
+                  },
+                  child: const Text('Confirmar'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -142,9 +163,6 @@ class ListaTransferenciaState extends State<ListaTransferencia> {
           ),
         ),
         title: const Text('Transferências'),
-        titleTextStyle: const TextStyle(
-            color: Colors.black54, fontSize: 20, fontWeight: FontWeight.bold),
-        backgroundColor: Colors.green,
       ),
       body: ListView.builder(
         itemCount: widget._transferencias.length,
@@ -161,11 +179,15 @@ class ListaTransferenciaState extends State<ListaTransferencia> {
             return FormularioTransferencia();
           }));
           future.then((transferenciaRecebida) {
-            if (transferenciaRecebida != null) {
-              setState(() {
-                widget._transferencias.add(transferenciaRecebida);
-              });
-            }
+            Future.delayed(
+              const Duration(seconds: 1),
+              () {
+                if (transferenciaRecebida != null) {
+                  setState(
+                      () => widget._transferencias.add(transferenciaRecebida));
+                }
+              },
+            );
           });
         },
         child: const Icon(Icons.add),
